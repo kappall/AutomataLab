@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutomataLab</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="main-container">
+        <header>
+            <h1>AutomataLab</h1>
+            <p>Tool for drawing DFA/NFA and exporting them to PNG.</p>
+        </header>
+
+        <div id="toolbar" class="toolbar">
+            <button id="addStateBtn" class="tool-btn">Add State</button>
+            <button id="addTransitionBtn" class="tool-btn">Add Transition</button>
+            <button id="setInitialBtn" class="tool-btn">Set Initial</button>
+            <button id="setFinalBtn" class="tool-btn">Toggle Final</button>
+            <button id="moveBtn" class="tool-btn active">Move</button>
+            <button id="deleteBtn" class="tool-btn">Delete</button>
+            <div class="flex-spacer"></div>
+            <button id="exportBtn" class="tool-btn export">Export PNG</button>
+        </div>
+
+        <div class="canvas-wrapper">
+            <canvas id="dfaCanvas"></canvas>
+        </div>
+
+        <div class="user-guide">
+            <h3>How to Use:</h3>
+            <ul>
+                <li><strong>Add State:</strong> Click anywhere on the canvas to add a new state</li>
+                <li><strong>Add Transition:</strong> Click first state, then second state to add transition (prompts for symbol)</li>
+                <li><strong>Set Initial:</strong> Click a state to make it the initial state</li>
+                <li><strong>Toggle Final:</strong> Click a state to toggle its final state status</li>
+                <li><strong>Move:</strong> Drag states to reposition them</li>
+                <li><strong>Delete:</strong> Click a state to remove it and its transitions</li>
+                <li><strong>Export:</strong> Click to save the automaton as PNG image</li>
+            </ul>
+        </div>
+
+        <footer>
+            <p>Created for "Computability and Formal Languages"</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
