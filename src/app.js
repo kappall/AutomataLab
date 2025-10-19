@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('dfaCanvas');
     const ctx = canvas.getContext('2d');
     const toolbar = document.getElementById('toolbar');
+    const mainContainer = document.querySelector('.main-container');
 
     let states = [];
     let transitions = [];
@@ -13,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedState = null;
     let isDragging = false;
     let dragOffsetX, dragOffsetY;
+    let isFullscreen = false;
 
     function resizeCanvas() {
         const container = canvas.parentElement;
@@ -24,6 +26,56 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
+    // Keyboard Shortcuts
+    const shortcuts = {
+        'a': 'addState',
+        't': 'addTransition',
+        'i': 'setInitial',
+        'f': 'setFinal',
+        'm': 'move',
+        'd': 'delete',
+        'e': 'export',
+        'Escape': 'clearMode',
+        ' ': 'fullscreen'
+    };
+
+    document.addEventListener('keydown', (e) => {
+        const key = e.key.toLowerCase();
+        if (e.target !== document.body && e.target.tagName !== 'CANVAS') return;
+
+        if (shortcuts[key] || shortcuts[e.key]) {
+            const action = shortcuts[key] || shortcuts[e.key];
+            
+            if (action === 'clearMode') {
+                setMode('move');
+                document.getElementById('moveBtn').classList.add('active');
+            } else if (action === 'export') {
+                e.preventDefault();
+                exportCanvas();
+            } else if (action === 'fullscreen') {
+                e.preventDefault();
+                toggleFullscreen();
+            } else {
+                setMode(action);
+                const btnId = action + 'Btn';
+                const buttons = toolbar.querySelectorAll('.tool-btn');
+                buttons.forEach(btn => btn.classList.remove('active'));
+                document.getElementById(btnId).classList.add('active');
+            }
+        }
+    });
+
+    function showShortcutHint() {
+        const hint = document.createElement('div');
+        hint.className = 'shortcut-hint';
+        hint.innerHTML = `
+            <strong>Keyboard Shortcuts:</strong> 
+            A (Add State) | T (Add Transition) | I (Initial) | F (Final) | M (Move) | D (Delete) | E (Export) | Space (Fullscreen)
+        `;
+        document.body.appendChild(hint);
+        setTimeout(() => hint.remove(), 5000);
+    }
+
     toolbar.addEventListener('click', (e) => {
         if (e.target.tagName !== 'BUTTON') return;
         
@@ -33,12 +85,27 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.id === 'exportBtn') {
             exportCanvas();
             document.getElementById(currentMode + 'Btn').classList.add('active');
+        } else if (e.target.id === 'fullscreenBtn') {
+            toggleFullscreen();
+            document.getElementById(currentMode + 'Btn').classList.add('active');
+        } else if (e.target.id === 'clearBtn') {
+            if (confirm('Clear all states and transitions?')) {
+                states = [];
+                transitions = [];
+                stateCounter = 0;
+                setMode('move');
+                document.getElementById('moveBtn').classList.add('active');
+            }
         } else {
             e.target.classList.add('active');
-            currentMode = e.target.id.replace('Btn', '');
-            canvas.style.cursor = getCursorForMode(currentMode);
+            setMode(e.target.id.replace('Btn', ''));
         }
     });
+
+    function setMode(mode) {
+        currentMode = mode;
+        canvas.style.cursor = getCursorForMode(currentMode);
+    }
 
     function getCursorForMode(mode) {
         switch (mode) {
@@ -196,6 +263,21 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.fill();
     }
 
+    function getAutomataBounds() {
+        if (states.length === 0) return null;
+        
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        
+        states.forEach(state => {
+            minX = Math.min(minX, state.x - stateRadius - 40);
+            maxX = Math.max(maxX, state.x + stateRadius + 40);
+            minY = Math.min(minY, state.y - stateRadius - 40);
+            maxY = Math.max(maxY, state.y + stateRadius + 40);
+        });
+        
+        return { minX, maxX, minY, maxY };
+    }
+
     canvas.addEventListener('mousedown', (e) => {
         const pos = getMousePos(e);
         const clickedState = getStateAtPos(pos);
@@ -246,6 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (clickedState) {
                     states = states.filter(s => s.id !== clickedState.id);
                     transitions = transitions.filter(t => t.from !== clickedState.id && t.to !== clickedState.id);
+                    if (states.length === 0) stateCounter = 0;
                 }
                 break;
 
@@ -298,9 +381,175 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function exportCanvas() {
+        if (states.length === 0) {
+            alert('Nothing to export! Add some states first.');
+            return;
+        }
+
+        const bounds = getAutomataBounds();
+        const padding = 20;
+        const exportWidth = bounds.maxX - bounds.minX + padding * 2;
+        const exportHeight = bounds.maxY - bounds.minY + padding * 2;
+
+        const exportCanvas = document.createElement('canvas');
+        exportCanvas.width = exportWidth;
+        exportCanvas.height = exportHeight;
+        const exportCtx = exportCanvas.getContext('2d');
+
+        exportCtx.fillStyle = '#ffffff';
+        exportCtx.fillRect(0, 0, exportWidth, exportHeight);
+
+        exportCtx.save();
+        exportCtx.translate(padding - bounds.minX, padding - bounds.minY);
+
+        transitions.forEach(transition => {
+            const fromState = states.find(s => s.id === transition.from);
+            const toState = states.find(s => s.id === transition.to);
+            if (!fromState || !toState) return;
+
+            exportCtx.strokeStyle = '#374151';
+            exportCtx.fillStyle = '#374151';
+            exportCtx.lineWidth = 2;
+
+            const angle = Math.atan2(toState.y - fromState.y, toState.x - fromState.x);
+
+            if (fromState.id === toState.id) {
+                const loopRadius = stateRadius / 2;
+                const loopCenterY = fromState.y - stateRadius - loopRadius;
+                const loopCenterX = fromState.x;
+
+                const startAngle = Math.PI * 0.6;
+                const endAngle = Math.PI * 2.4;
+                exportCtx.beginPath();
+                exportCtx.arc(loopCenterX, loopCenterY, loopRadius, startAngle, endAngle);
+                exportCtx.stroke();
+
+                const arrowEndAngle = 0.4 * Math.PI;
+                const arrowPoint = {
+                    x: loopCenterX + loopRadius * Math.cos(arrowEndAngle),
+                    y: loopCenterY + loopRadius * Math.sin(arrowEndAngle)
+                };
+                const tangentAngle = arrowEndAngle + Math.PI / 2;
+                drawExportArrowhead(exportCtx, arrowPoint.x, arrowPoint.y, tangentAngle);
+
+                exportCtx.font = '14px Inter';
+                exportCtx.textAlign = 'center';
+                exportCtx.textBaseline = 'bottom';
+                exportCtx.fillText(transition.symbol, loopCenterX, loopCenterY - loopRadius - 4);
+            } else {
+                const start = {
+                    x: fromState.x + stateRadius * Math.cos(angle),
+                    y: fromState.y + stateRadius * Math.sin(angle)
+                };
+                const end = {
+                    x: toState.x - stateRadius * Math.cos(angle),
+                    y: toState.y - stateRadius * Math.sin(angle)
+                };
+                const midPoint = {
+                    x: (start.x + end.x) / 2,
+                    y: (start.y + end.y) / 2
+                };
+                const controlOffset = 30;
+                let controlPoint = { x: midPoint.x, y: midPoint.y };
+
+                const reverseExists = transitions.some(t => t.from === toState.id && t.to === fromState.id);
+                if(reverseExists) {
+                    controlPoint.x += controlOffset * Math.sin(angle);
+                    controlPoint.y -= controlOffset * Math.cos(angle);
+                }
+
+                exportCtx.beginPath();
+                exportCtx.moveTo(start.x, start.y);
+                exportCtx.quadraticCurveTo(controlPoint.x, controlPoint.y, end.x, end.y);
+                exportCtx.stroke();
+
+                const p1 = controlPoint;
+                const p2 = end;
+                const arrowAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+                drawExportArrowhead(exportCtx, end.x, end.y, arrowAngle);
+
+                const labelPos = {
+                    x: controlPoint.x + 15 * Math.sin(angle),
+                    y: controlPoint.y - 15 * Math.cos(angle)
+                };
+
+                exportCtx.font = '14px Inter';
+                exportCtx.textAlign = 'center';
+                exportCtx.fillText(transition.symbol, labelPos.x, labelPos.y);
+            }
+        });
+
+        states.forEach(state => {
+            exportCtx.beginPath();
+            exportCtx.arc(state.x, state.y, stateRadius, 0, Math.PI * 2);
+            exportCtx.strokeStyle = '#4b5563';
+            exportCtx.lineWidth = 2;
+            exportCtx.fillStyle = 'white';
+            exportCtx.fill();
+            exportCtx.stroke();
+
+            if (state.isFinal) {
+                exportCtx.beginPath();
+                exportCtx.arc(state.x, state.y, stateRadius - 6, 0, Math.PI * 2);
+                exportCtx.strokeStyle = '#4b5563';
+                exportCtx.lineWidth = 2;
+                exportCtx.stroke();
+            }
+
+            exportCtx.fillStyle = '#1f2937';
+            exportCtx.font = '16px Inter';
+            exportCtx.textAlign = 'center';
+            exportCtx.textBaseline = 'middle';
+            exportCtx.fillText(state.name, state.x, state.y);
+
+            if (state.isInitial) {
+                const arrowStart = { x: state.x - stateRadius - 30, y: state.y };
+                drawExportArrow(exportCtx, arrowStart.x, arrowStart.y, state.x - stateRadius, state.y, '#4b5563');
+            }
+        });
+
+        exportCtx.restore();
+
         const link = document.createElement('a');
         link.download = 'automata.png';
-        link.href = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
+        link.href = exportCanvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
         link.click();
+    }
+
+    function drawExportArrowhead(ctx, x, y, angle) {
+        const headlen = 10;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - headlen * Math.cos(angle - Math.PI / 6), y - headlen * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(x - headlen * Math.cos(angle + Math.PI / 6), y - headlen * Math.sin(angle + Math.PI / 6));
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    function drawExportArrow(ctx, fromx, fromy, tox, toy, color) {
+        const angle = Math.atan2(toy - fromy, tox - fromx);
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(fromx, fromy);
+        ctx.lineTo(tox, toy);
+        ctx.stroke();
+        drawExportArrowhead(ctx, tox, toy, angle);
+    }
+
+    function toggleFullscreen() {
+        if (!isFullscreen) {
+            mainContainer.classList.add('fullscreen');
+            canvas.parentElement.classList.add('fullscreen-canvas');
+            toolbar.classList.add('fullscreen-toolbar');
+            isFullscreen = true;
+        } else {
+            mainContainer.classList.remove('fullscreen');
+            canvas.parentElement.classList.remove('fullscreen-canvas');
+            toolbar.classList.remove('fullscreen-toolbar');
+            isFullscreen = false;
+        }
+        resizeCanvas();
     }
 });
