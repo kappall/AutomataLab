@@ -14,7 +14,7 @@ It allows you to **draw states, transitions, and export the automaton as PNG**.
 ## Usage
 1. Open `index.html` in your browser  
 2. Use the toolbar to add states, transitions, or set initial/final states  
-3. Click **"Esporta come PNG"** to save your automaton
+3. Click **"Export as PNG"** to save your automaton
 
 ## Future Improvements (Planned)
 - Automaton validation (determinism, unreachable states)
