@@ -71,22 +71,25 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.target.tagName !== 'BUTTON') return;
 
       if (e.target.id === 'exportBtn') {
-          exportCanvas();
+        exportCanvas();
       } else if (e.target.id === 'fullscreenBtn') {
-          toggleFullscreen();
+        toggleFullscreen();
       } else if (e.target.id === 'clearBtn') {
-          if (confirm('Clear all states and transitions?')) {
-              states = [];
-              transitions = [];
-              stateCounter = 0;
-              setMode('move');
-              updateToolbarActiveStates();
+        customConfirm('Clear all states and transitions?').then((v) => {
+          if (v) {
+            states = [];
+            transitions = [];
+            stateCounter = 0;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            setMode('move');
+            updateToolbarActiveStates();
           }
+        });
       } else {
-          const buttons = toolbar.querySelectorAll('.tool-btn:not(#customNamesBtn)');
-          buttons.forEach(btn => btn.classList.remove('active'));
-          e.target.classList.add('active');
-          setMode(e.target.id.replace('Btn', ''));
+        const buttons = toolbar.querySelectorAll('.tool-btn:not(#customNamesBtn)');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        e.target.classList.add('active');
+        setMode(e.target.id.replace('Btn', ''));
       }
   });
 
@@ -242,42 +245,42 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function drawArrow(fromx, fromy, tox, toy, color) {
-      const angle = Math.atan2(toy - fromy, tox - fromx);
-      ctx.save();
-      ctx.strokeStyle = color;
-      ctx.fillStyle = color;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(fromx, fromy);
-      ctx.lineTo(tox, toy);
-      ctx.stroke();
-      drawArrowhead(tox, toy, angle);
-      ctx.restore();
+    const angle = Math.atan2(toy - fromy, tox - fromx);
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(fromx, fromy);
+    ctx.lineTo(tox, toy);
+    ctx.stroke();
+    drawArrowhead(tox, toy, angle);
+    ctx.restore();
   }
 
   function drawArrowhead(x, y, angle) {
       const headlen = 10;
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(x - headlen * Math.cos(angle - Math.PI / 6), y - headlen * Math.sin(angle - Math.PI / 6));
-      ctx.lineTo(x - headlen * Math.cos(angle + Math.PI / 6), y - headlen * Math.sin(angle + Math.PI / 6));
-      ctx.closePath();
-      ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x - headlen * Math.cos(angle - Math.PI / 6), y - headlen * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(x - headlen * Math.cos(angle + Math.PI / 6), y - headlen * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
   }
 
   function getAutomataBounds() {
-      if (states.length === 0) return null;
-      
-      let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-      
-      states.forEach(state => {
-          minX = Math.min(minX, state.x - stateRadius - 40);
-          maxX = Math.max(maxX, state.x + stateRadius + 40);
-          minY = Math.min(minY, state.y - stateRadius - 40);
-          maxY = Math.max(maxY, state.y + stateRadius + 40);
-      });
-      
-      return { minX, maxX, minY, maxY };
+    if (states.length === 0) return null;
+    
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    
+    states.forEach(state => {
+      minX = Math.min(minX, state.x - stateRadius - 40);
+      maxX = Math.max(maxX, state.x + stateRadius + 40);
+      minY = Math.min(minY, state.y - stateRadius - 40);
+      maxY = Math.max(maxY, state.y + stateRadius + 40);
+    });
+    
+    return { minX, maxX, minY, maxY };
   }
 
   canvas.addEventListener('mousedown', (e) => {
@@ -286,67 +289,67 @@ document.addEventListener('DOMContentLoaded', () => {
 
     switch (currentMode) {
       case 'addState':
-          let base = stateCounter;
-          if (customStateNames) {
-            base = prompt('Enter state name:', base);
-          }
-          states.push({
-            id: stateCounter,
-            name: `q${base}`,
-            x: pos.x,
-            y: pos.y,
-            isInitial: false,
-            isFinal: false,
-          });
-          stateCounter++;
-          break;
+        let base = stateCounter;
+        if (customStateNames) {
+          base = prompt('Enter state name:', base);
+        }
+        states.push({
+          id: stateCounter,
+          name: `q${base}`,
+          x: pos.x,
+          y: pos.y,
+          isInitial: false,
+          isFinal: false,
+        });
+        stateCounter++;
+        break;
         
-        case 'addTransition':
-          if (clickedState) {
-            if (!transitionStart) transitionStart = clickedState;
-            else {
-              const symbol = prompt('Enter transition symbol(s):', 'a');
-              if (symbol) {
-                transitions.push({
-                  from: transitionStart.id,
-                  to: clickedState.id,
-                  symbol: symbol
-                });
-              }
-              transitionStart = null;
+      case 'addTransition':
+        if (clickedState) {
+          if (!transitionStart) transitionStart = clickedState;
+          else {
+            const symbol = prompt('Enter transition symbol(s):', 'a');
+            if (symbol) {
+              transitions.push({
+                from: transitionStart.id,
+                to: clickedState.id,
+                symbol: symbol
+              });
             }
+            transitionStart = null;
           }
-          break;
+        }
+        break;
         
-        case 'setInitial':
-          if (clickedState) {
-            states.forEach(s => s.isInitial = (s.id === clickedState.id));
-          }
-          break;
+      case 'setInitial':
+        if (clickedState) {
+          states.forEach(s => s.isInitial = (s.id === clickedState.id));
+        }
+        break;
 
-        case 'setFinal':
-          if (clickedState) {
-            clickedState.isFinal = !clickedState.isFinal;
-          }
-          break;
-        
-        case 'delete':
-          if (clickedState) {
-            states = states.filter(s => s.id !== clickedState.id);
-            transitions = transitions.filter(t => t.from !== clickedState.id && t.to !== clickedState.id);
-            if (states.length === 0) stateCounter = 0;
-          }
-          break;
+      case 'setFinal':
+        if (clickedState) {
+          clickedState.isFinal = !clickedState.isFinal;
+        }
+        break;
+      
+      case 'delete':
+        if (clickedState) {
+          states = states.filter(s => s.id !== clickedState.id);
+          transitions = transitions.filter(t => t.from !== clickedState.id && t.to !== clickedState.id);
+          if (states.length === 0) stateCounter = 0;
+        }
+        break;
 
-        case 'move':
-          if (clickedState) {
-            isDragging = true;
-            selectedState = clickedState;
-            dragOffsetX = pos.x - selectedState.x;
-            dragOffsetY = pos.y - selectedState.y;
-            canvas.style.cursor = 'grabbing';
-          }
-          break;
+      case 'move':
+        if (clickedState) {
+          isDragging = true;
+          selectedState = clickedState;
+          dragOffsetX = pos.x - selectedState.x;
+          dragOffsetY = pos.y - selectedState.y;
+          canvas.style.cursor = 'grabbing';
+        }
+        break;
     }
     draw();
   });
@@ -557,4 +560,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     resizeCanvas();
   }
+
+  function customConfirm(message) {
+  return new Promise((resolve) => {
+    const modal = document.getElementById('customConfirmModal');
+    const msg = document.getElementById('confirmMessage');
+    const yesBtn = document.getElementById('confirmYes');
+    const noBtn = document.getElementById('confirmNo');
+
+    msg.textContent = message;
+    modal.classList.remove('hidden');
+
+    const cleanUp = () => {
+      modal.classList.add('hidden');
+      yesBtn.removeEventListener('click', onYes);
+      noBtn.removeEventListener('click', onNo);
+    };
+
+    const onYes = () => {
+      cleanUp();
+      resolve(true);
+    };
+
+    const onNo = () => {
+      cleanUp();
+      resolve(false);
+    };
+
+    yesBtn.addEventListener('click', onYes);
+    noBtn.addEventListener('click', onNo);
+  });
+}
+
 });
