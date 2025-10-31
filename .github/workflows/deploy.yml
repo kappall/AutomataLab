@@ -1,5 +1,9 @@
 name: Build and push deploy branch
 
+permissions:
+  contents: write
+  id-token: write
+
 on:
   push:
     branches:
