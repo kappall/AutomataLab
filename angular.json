@@ -23,6 +23,7 @@
                 "src/styles"
               ]
             },
+            "outputPath": "dist/AutomataLab/browser",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
