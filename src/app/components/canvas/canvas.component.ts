@@ -1,6 +1,6 @@
 import { Component, ElementRef, ViewChild, OnInit, AfterViewInit, OnDestroy, Renderer2 } from '@angular/core';
 import { CanvasService } from 'app/services/canvas.service';
-import { map, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { State } from '../../models/state.model';
 import { Transition } from '../../models/transition.model';
 
