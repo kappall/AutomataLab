@@ -1,0 +1,70 @@
+@use 'index' as *;
+
+.toolbar {
+  @include card;
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+  @include transition(all);
+
+  @include mobile {
+    padding: 0.75rem;
+    gap: $spacing-xs;
+  }
+}
+
+.tool-btn {
+  @include button-base;
+  background: $color-white;
+  color: $color-gray-700;
+
+  &.active {
+    background: $color-primary;
+    color: $color-white;
+    border-color: $color-primary;
+  }
+
+  &.export {
+    background: $color-success;
+    color: $color-white;
+    border-color: $color-success;
+
+    &:hover {
+      background: $color-success-dark;
+      border-color: $color-success-dark;
+    }
+  }
+
+  &.danger {
+    background: $color-danger;
+    color: $color-white;
+    border-color: $color-danger;
+
+    &:hover {
+      background: $color-danger-dark;
+      border-color: $color-danger-dark;
+    }
+  }
+
+  &.toggle {
+    background: $color-gray-100;
+    border-color: $color-gray-300;
+    color: $color-gray-500;
+
+    &.active {
+      background: $color-warning;
+      color: $color-gray-800;
+      border-color: $color-warning;
+    }
+  }
+
+  @include mobile {
+    padding: 0.4rem 0.8rem;
+    font-size: $font-size-xs;
+  }
+}
+
+.flex-spacer {
+  flex: 1;
+}

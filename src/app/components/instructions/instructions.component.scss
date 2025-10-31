@@ -1,0 +1,35 @@
+@use 'index' as *;
+
+.user-guide {
+  margin: $spacing-md auto;
+  max-width: 800px;
+  padding: $spacing-md;
+  background-color: $color-gray-50;
+  border-radius: $radius-md;
+  box-shadow: $shadow-sm;
+  color: $color-gray-700;
+  font-family: $font-family;
+}
+
+.user-guide h3 {
+  color: $color-gray-800;
+  margin-bottom: $spacing-sm;
+  font-size: $font-size-lg;
+}
+
+.user-guide ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.user-guide li {
+  margin: 0.5rem 0;
+  color: $color-gray-600;
+  font-size: $font-size-sm;
+}
+
+.user-guide li strong {
+  color: $color-gray-800;
+  margin-right: 0.25rem;
+}

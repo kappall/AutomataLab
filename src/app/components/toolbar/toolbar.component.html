@@ -1,0 +1,63 @@
+<div class="toolbar">
+  <button 
+    class="tool-btn" 
+    [class.active]="isActive('addState')"
+    (click)="setMode('addState')" 
+    title="A">
+    Add State
+  </button>
+  <button 
+    class="tool-btn" 
+    [class.active]="isActive('addTransition')"
+    (click)="setMode('addTransition')" 
+    title="T">
+    Add Transition
+  </button>
+  <button 
+    class="tool-btn" 
+    [class.active]="isActive('setInitial')"
+    (click)="setMode('setInitial')" 
+    title="I">
+    Set Initial
+  </button>
+  <button 
+    class="tool-btn" 
+    [class.active]="isActive('setFinal')"
+    (click)="setMode('setFinal')" 
+    title="F">
+    Set Final
+  </button>
+  <button 
+    class="tool-btn" 
+    [class.active]="isActive('move')"
+    (click)="setMode('move')" 
+    title="M">
+    Move
+  </button>
+  <button 
+    class="tool-btn" 
+    [class.active]="isActive('delete')"
+    (click)="setMode('delete')" 
+    title="D">
+    Delete
+  </button>
+  <div class="flex-spacer"></div>
+  <button 
+    class="tool-btn export" 
+    (click)="exportCanvas()" 
+    title="E">
+    Export
+  </button>
+  <button 
+    class="tool-btn" 
+    (click)="toggleFullscreen()" 
+    title="Space">
+    Fullscreen
+  </button>
+  <label class="tool-btn toggle" [class.active]="customNames">
+    <input type="checkbox" 
+           [checked]="customNames" 
+           (change)="toggleCustomNames()"> 
+    Custom Names
+  </label>
+</div>

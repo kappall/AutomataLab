@@ -1,71 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AutomataLab</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <title>AutomataLab</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
-    <div class="main-container">
-        <header>
-            <h1>AutomataLab</h1>
-            <p>Tool for drawing DFA/NFA and exporting them to PNG.</p>
-        </header>
-
-        <div id="toolbar" class="toolbar">
-            <button id="addStateBtn" class="tool-btn" title="A">Add State</button>
-            <button id="addTransitionBtn" class="tool-btn" title="T">Add Transition</button>
-            <button id="setInitialBtn" class="tool-btn" title="I">Set Initial</button>
-            <button id="setFinalBtn" class="tool-btn" title="F">Toggle Final</button>
-            <button id="moveBtn" class="tool-btn active" title="M">Move</button>
-            <button id="deleteBtn" class="tool-btn" title="D">Delete</button>
-            <div class="flex-spacer"></div>
-            <button id="fullscreenBtn" class="tool-btn" title="Space">Fullscreen</button>
-            <button id="clearBtn" class="tool-btn danger" title="">Clear All</button>
-            <button id="exportBtn" class="tool-btn export" title="E">Export PNG</button>
-            <label class="switch tool-btn toggle">
-              Custom State Names
-              <input id="customNamesBtn" type="checkbox">
-              <span class="slider round"></span>
-            </label>
-        </div>
-
-        <div class="canvas-wrapper">
-            <canvas id="dfaCanvas"></canvas>
-        </div>
-
-        <div class="user-guide">
-            <h3>How to Use:</h3>
-            <ul>
-                <li><strong>Add State (A):</strong> Click anywhere on the canvas to add a new state</li>
-                <li><strong>Add Transition (T):</strong> Click first state, then second state to add transition (prompts for symbol)</li>
-                <li><strong>Set Initial (I):</strong> Click a state to make it the initial state</li>
-                <li><strong>Toggle Final (F):</strong> Click a state to toggle its final state status</li>
-                <li><strong>Move (M):</strong> Drag states to reposition them</li>
-                <li><strong>Delete (D):</strong> Click a state to remove it and its transitions</li>
-                <li><strong>Fullscreen (Space):</strong> Toggle fullscreen mode for better visualization</li>
-                <li><strong>Export (E):</strong> Click to save the automaton as PNG image (cropped to content)</li>
-                <li><strong>Clear All:</strong> Remove all states and transitions (resets q₀)</li>
-                <li><strong>Esc:</strong> Return to Move mode</li>
-            </ul>
-        </div>
-
-        <footer>
-            <p>Created for "Computability and Formal Languages"</p>
-        </footer>
-    </div>
-
-    
-    <div id="customConfirmModal" class="confirm-modal hidden">
-      <div class="confirm-box">
-        <p id="confirmMessage">Are you sure?</p>
-        <div class="confirm-buttons">
-          <button id="confirmNo" class="confirm-btn confirm-no">Cancel</button>
-          <button id="confirmYes" class="confirm-btn confirm-yes">Confirm</button>
-        </div>
-      </div>
-    </div>
-    <script src="app.js"></script>
+  <app-root></app-root>
 </body>
 </html>

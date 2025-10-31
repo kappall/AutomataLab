@@ -1,0 +1,48 @@
+@use 'variables' as *;
+
+@mixin button-base {
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  transition: all $transition-fast;
+  border: 1px solid $color-gray-300;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: $shadow-md;
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// Card/Container styles
+@mixin card {
+  background: $color-white;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  box-shadow: $shadow-md;
+}
+
+// Flexbox centering
+@mixin flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+@mixin mobile {
+  @media (max-width: $breakpoint-mobile) {
+    @content;
+  }
+}
+
+@mixin transition($properties...) {
+  transition-property: $properties;
+  transition-duration: $transition-normal;
+  transition-timing-function: ease;
+}

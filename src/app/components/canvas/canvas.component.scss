@@ -1,0 +1,29 @@
+@use 'index' as *;
+
+:host {
+  display: block;
+  height: 100%;
+}
+
+.canvas-wrapper {
+  background: $color-gray-50;
+  border: 1px solid $color-gray-200;
+  border-radius: $radius-md;
+  overflow: hidden;
+  @include transition(all);
+  display: flex;
+  height: 100%;
+  background-image: url('/diamond-sunset.svg');
+  background-repeat: repeat;
+  background-position: center;
+  background-size: 220px 220px;
+}
+
+canvas {
+  background: transparent;
+  width: 100%;
+  flex: 1 1 auto;
+  height: 100%;
+  cursor: crosshair;
+  display: block;
+}
