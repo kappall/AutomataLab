@@ -1,75 +1,58 @@
-name: Build and push deploy branch
-
-permissions:
-  contents: write
-  id-token: write
+name: Build and Deploy Angular
 
 on:
   push:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          persist-credentials: true
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
-          node-version: '22'
+          node-version: 22
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build production
-        run: npm run build --if-present
 
-      - name: Prepare deploy branch and push build
+      - name: Build Angular
+        run: npm run build -- --configuration=production
+
+      - name: Add 404.html redirect for SPA
+        run: cp dist/AutomataLab/browser/index.html dist/AutomataLab/browser/404.html
+
+      - name: Deploy to deploy branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          set -euo pipefail
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
 
-          FIRST_BROWSER_DIR=$(find dist -type d -path 'dist/*/browser' -print -quit || true)
-          if [ -n "$FIRST_BROWSER_DIR" ]; then
-            BUILD_DIR="$FIRST_BROWSER_DIR"
-          elif [ -d "dist/browser" ]; then
-            BUILD_DIR="dist/browser"
+          if git show-ref --quiet refs/heads/deploy; then
+            git checkout deploy
           else
-            # fallback: first directory under dist (e.g. dist/AutomataLab)
-            if [ -d dist ] && [ "$(ls -A dist)" ]; then
-              FIRST_SUBDIR=$(find dist -mindepth 1 -maxdepth 1 -type d | head -n 1 || true)
-              if [ -n "$FIRST_SUBDIR" ]; then
-                BUILD_DIR="$FIRST_SUBDIR"
-              else
-                BUILD_DIR="dist"
-              fi
-            else
-              echo "No build output found in dist/"; exit 1
-            fi
+            git checkout --orphan deploy
           fi
 
-          echo "Using build directory: $BUILD_DIR"
-
-          TMPDIR="$(mktemp -d)"
-          cp -a "$BUILD_DIR"/. "$TMPDIR"/
-
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          git checkout --orphan deploy
           git rm -rf . || true
-          git clean -fdx
 
-          cp -a "$TMPDIR"/. .
+          cp -r dist/AutomataLab/browser/* .
 
-          git add -A
-          git commit -m "Deploy: build from ${GITHUB_SHA}" || echo "Nothing to commit"
-          git push -f origin deploy
+          git add .
+
+          git commit -m "Deploy from GitHub Actions [skip ci]" || echo "No changes to commit"
+
+          git push origin deploy --force
