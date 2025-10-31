@@ -15,8 +15,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -27,32 +25,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-
-      - name: Build Angular
-        run: npm run build -- --configuration=production
-
-      - name: Add 404.html redirect for SPA
-        run: cp dist/AutomataLab/browser/index.html dist/AutomataLab/browser/404.html
-
-      - name: Deploy to deploy branch
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build Angular for GitHub Pages
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
+          npm run build -- --configuration=production --base-href "/AutomataLab/"
+          cp dist/AutomataLab/browser/index.html dist/AutomataLab/browser/404.html
 
-          if git show-ref --quiet refs/heads/deploy; then
-            git checkout deploy
-          else
-            git checkout --orphan deploy
-          fi
-
-          git rm -rf . || true
-
-          cp -r dist/AutomataLab/browser/* .
-
-          git add .
-
-          git commit -m "Deploy from GitHub Actions [skip ci]" || echo "No changes to commit"
-
-          git push origin deploy --force
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: dist/AutomataLab/browser
+          publish_branch: gh-pages
+          commit_message: "Deploy from GitHub Actions [skip ci]"
