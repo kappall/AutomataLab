@@ -37,9 +37,13 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [ -d "dist/browser" ]; then
+          FIRST_BROWSER_DIR=$(find dist -type d -path 'dist/*/browser' -print -quit || true)
+          if [ -n "$FIRST_BROWSER_DIR" ]; then
+            BUILD_DIR="$FIRST_BROWSER_DIR"
+          elif [ -d "dist/browser" ]; then
             BUILD_DIR="dist/browser"
           else
+            # fallback: first directory under dist (e.g. dist/AutomataLab)
             if [ -d dist ] && [ "$(ls -A dist)" ]; then
               FIRST_SUBDIR=$(find dist -mindepth 1 -maxdepth 1 -type d | head -n 1 || true)
               if [ -n "$FIRST_SUBDIR" ]; then
